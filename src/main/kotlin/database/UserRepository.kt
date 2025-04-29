@@ -31,14 +31,16 @@ class UserRepository {
         }
     }
 
-    fun checkCredentials(email: String, password: String): Boolean {
+    fun checkCredentials(email: String, password: String): String? {
         return transaction {
             val user = Users.select { Users.email eq email }.singleOrNull()
             if (user != null) {
                 val hash = user[Users.passwordHash]
-                return@transaction org.mindrot.jbcrypt.BCrypt.checkpw(password, hash)
+                if (BCrypt.checkpw(password, hash)) {
+                    return@transaction user[Users.username] // вернём имя
+                }
             }
-            false
+            return@transaction null
         }
     }
 

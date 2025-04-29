@@ -38,13 +38,12 @@ fun Application.configureRouting() {
         post("/login") {
             val request = call.receive<LoginRequest>()
 
-            val isValid = userRepo.checkCredentials(request.email, request.password)
-
-            if (isValid) {
+            val name = userRepo.checkCredentials(request.email, request.password)
+            if (name != null) {
                 val token = JwtConfig.generateToken(request.email)
-                call.respond(LoginResponse(token))
+                call.respond(LoginResponse(token = token, name = name))
             } else {
-                call.respondText("Неверный email или пароль", status = io.ktor.http.HttpStatusCode.Unauthorized)
+                call.respondText("Неверный email или пароль", status = HttpStatusCode.Unauthorized)
             }
         }
         post("/forgot-password") {
